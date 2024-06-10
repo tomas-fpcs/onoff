@@ -17,7 +17,6 @@ import se.fpcs.elpris.onoff.security.User;
 import se.fpcs.elpris.onoff.validation.ValidEnum;
 
 
-
 @Controller
 @SuppressWarnings("java:S6833") // this class is NOT a REST controller
 public class OnOffController {
@@ -38,11 +37,13 @@ public class OnOffController {
     @ResponseBody
     @SuppressWarnings("java:S1452")
     public ResponseEntity<?> onoff(
-            @RequestParam(name = "price_source", required = false) @ValidEnum(enumClass = PriceSource.class, allowNull = true) PriceSource priceSource,
+            @RequestParam(name = "price_source", required = false)
+            @ValidEnum(enumClass = PriceSource.class, allowNull = true) PriceSource priceSource,
             @RequestParam("price_zone") @ValidEnum(enumClass = PriceZone.class) PriceZone priceZone,
             @RequestParam("max_price") @Min(0) Integer maxPriceOre,
             @RequestParam("markup_percent") @Min(0) Integer markupPercent,
-            @RequestParam(name = "output_type", required = false) @ValidEnum(enumClass = OutputType.class, allowNull = true) OutputType outputType
+            @RequestParam(name = "output_type", required = false)
+            @ValidEnum(enumClass = OutputType.class, allowNull = true) OutputType outputType
     ) {
 
         OnOff onOff = onOffServiceProvider.get(priceSource).on(
@@ -51,14 +52,20 @@ public class OnOffController {
                 maxPriceOre,
                 User.builder().name("DevUser").build());
 
-        if (outputType == null || outputType == OutputType.TEXT) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body(toText(onOff));
-        } else {
+        if (outputType == null || outputType == OutputType.JSON) {
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(onOff);
+        } //
+        else if (outputType == OutputType.MINIMALIST) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(onOff.isOn());
+        } //
+        else {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(toText(onOff));
         }
 
     }

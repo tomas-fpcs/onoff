@@ -58,14 +58,14 @@ Valid values: 0 to infinity
 #### output_type (optional)
 The format you want the response in, JSON is default
 
-Valid values: "JSON", "TEXT"
+Valid values: "JSON", "TEXT", "MINIMALIST"
 
 ## Build and deploy 
 
-docker stop onoff-app
+docker stop onoff
 mvn clean install -U  
-docker build -t onoff-app .
-docker run -p 8080:8080 onoff-app
+docker build -t onoff .
+docker run -p 8080:8080 onoff
 
 ## Database
 ### In-memory db for dev
