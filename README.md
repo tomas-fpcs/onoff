@@ -60,6 +60,11 @@ The format you want the response in, JSON is default
 
 Valid values: "JSON", "TEXT", "MINIMALIST"
 
+## Response
+
+- For output_type TEXT and MINIMALIST the Content-Type is "text/plain"
+- For output_type JSON the Content-Type is "application/json"
+
 ## Build and deploy 
 
 docker stop onoff
