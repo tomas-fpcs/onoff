@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+onoff:
+  hostname: onoff-qbnhglfqca-lz.a.run.app
+  port:  443
+  scheme: https

@@ -19,6 +19,11 @@ thru http like once every five minutes to see if it should turn on or off the re
 
 ## Usage
 
+### Swagger / OpenApi
+
+- /v3/api-docs
+- /swagger-ui/index.html
+
 NOTE: the api key will be replace with a more secure authentication method before release of a production version.
 
 ```
