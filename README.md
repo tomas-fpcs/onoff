@@ -1,7 +1,5 @@
 # OnOff
 
-**NOTE: this application is still under development**
-
 ## Author
 
 - Tomas Faal Petersson
