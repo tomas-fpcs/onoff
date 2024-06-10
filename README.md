@@ -2,6 +2,12 @@
 
 **NOTE: this application is still under development**
 
+## Author
+
+- Tomas Faal Petersson
+- tomas@fpcs.se
+- [LinkedIn Profile](https://www.linkedin.com/in/tomasfaalpetersson/)
+
 ## Description
 
 I heat my home with a automated wood pellet furnace. Due to the current high price of wood pellets it
