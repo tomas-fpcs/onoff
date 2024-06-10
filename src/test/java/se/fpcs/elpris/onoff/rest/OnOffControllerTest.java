@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static se.fpcs.elpris.onoff.ApiVersion.ONOFF_V1;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,7 +51,7 @@ class OnOffControllerTest {
         {
             final String expected = "{\"on\":false,\"max-price\":50,\"price-spot\":85,\"price-supplier\":92,\"user-name\":\"DevUser\"}";
 
-            mockMvc.perform(get("/api/onoff")
+            mockMvc.perform(get(ONOFF_V1 + "/onoff")
                             .param("price_source", "elprisetjustnu")
                             .param("price_zone", "SE3")
                             .param("price_day", "2024-05-30")
@@ -65,7 +66,7 @@ class OnOffControllerTest {
         {
             final String expected = "{\"price_source\":\"Parameter 'price_source' should be of type 'PriceSource' but the value 'non_existing' is not\"}";
 
-            mockMvc.perform(get("/api/onoff")
+            mockMvc.perform(get(ONOFF_V1 + "/onoff")
                             .param("price_source", "non_existing")
                             .param("price_zone", "SE3")
                             .param("price_day", "2024-05-30")
@@ -80,7 +81,7 @@ class OnOffControllerTest {
         {
             final String expected = "{\"on\":false,\"max-price\":50,\"price-spot\":85,\"price-supplier\":92,\"user-name\":\"DevUser\"}";
 
-            mockMvc.perform(get("/api/onoff")
+            mockMvc.perform(get(ONOFF_V1 + "/onoff")
                             // no price_source, expect default
                             .param("price_zone", "SE3")
                             .param("price_day", "2024-05-30")

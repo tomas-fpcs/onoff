@@ -24,8 +24,7 @@ thru http like once every five minutes to see if it should turn on or off the re
 - /v3/api-docs
 - /swagger-ui/index.html
 
-NOTE: the api key will be replace with a more secure authentication method before release of a production version.
-
+## Example
 ```
 curl -G \
     -H "x-api-key: 47e4de80-9881-4914-9b78-8b3706be4235" \
@@ -34,7 +33,7 @@ curl -G \
     --data-urlencode "markup_percent=0" \
     --data-urlencode "max_price=40" \
     --data-urlencode "output_type=JSON" \
-http://localhost:8080/api/onoff
+http://localhost:8080/api/<version>/onoff
 ```
 
 ### Parameters

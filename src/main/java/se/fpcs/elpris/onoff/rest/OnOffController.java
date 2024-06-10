@@ -16,6 +16,8 @@ import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.security.User;
 import se.fpcs.elpris.onoff.validation.ValidEnum;
 
+import static se.fpcs.elpris.onoff.ApiVersion.ONOFF_V1;
+
 
 @Controller
 @SuppressWarnings("java:S6833") // this class is NOT a REST controller
@@ -33,7 +35,7 @@ public class OnOffController {
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = OnOff.class))})
     //@ApiResponse(responseCode = "404", description = "User not found", content = @Content)
-    @GetMapping(value = "/api/onoff")
+    @GetMapping(value = ONOFF_V1 + "/onoff")
     @ResponseBody
     @SuppressWarnings("java:S1452")
     public ResponseEntity<?> onoff(
