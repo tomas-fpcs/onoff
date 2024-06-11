@@ -1,5 +1,7 @@
 package se.fpcs.elpris.onoff.rest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +32,7 @@ public class OnOffController {
         this.onOffServiceProvider = onOffServiceProvider;
     }
 
-    //@Operation(summary = "Get user by ID", description = "Retrieve a user by their ID")
+    @Operation(summary = "Determine if device should be on")
     @ApiResponse(responseCode = "200",
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = OnOff.class))})
@@ -39,11 +41,20 @@ public class OnOffController {
     @ResponseBody
     @SuppressWarnings("java:S1452")
     public ResponseEntity<?> onoff(
+            @Parameter(description = "The source of the spot prices, currently https://www.elprisetjustnu.se is the only supported source")
             @RequestParam(name = "price_source", required = false)
             @ValidEnum(enumClass = PriceSource.class, allowNull = true) PriceSource priceSource,
+
+            @Parameter(description = "The price zone (swedish: elområde)", required = true)
             @RequestParam("price_zone") @ValidEnum(enumClass = PriceZone.class) PriceZone priceZone,
+
+            @Parameter(description = "The maximum price for the device to be on", required = true)
             @RequestParam("max_price") @Min(0) Integer maxPriceOre,
+
+            @Parameter(description = "The markup added to the spot price by your provider, in percent ", required = true)
             @RequestParam("markup_percent") @Min(0) Integer markupPercent,
+
+            @Parameter(description = "The output format")
             @RequestParam(name = "output_type", required = false)
             @ValidEnum(enumClass = OutputType.class, allowNull = true) OutputType outputType
     ) {
@@ -52,7 +63,7 @@ public class OnOffController {
                 priceZone,
                 markupPercent,
                 maxPriceOre,
-                User.builder().name("DevUser").build());
+                User.builder().name("DevUser").build()); //TODO implement real users
 
         if (outputType == null || outputType == OutputType.JSON) {
             return ResponseEntity.ok()
