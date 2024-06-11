@@ -7,10 +7,6 @@ steps:
   # Step 2: Set up JDK 17 and build the project with Maven
   - name: 'gcr.io/cloud-builders/mvn'
     args: ['clean', 'install']
-    env:
-      - 'JAVA_HOME=/opt/openjdk-17'
-      - 'MAVEN_OPTS=-Xmx1024m'
-    dir: '/workspace/onoff'
 
   # Step 3: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
