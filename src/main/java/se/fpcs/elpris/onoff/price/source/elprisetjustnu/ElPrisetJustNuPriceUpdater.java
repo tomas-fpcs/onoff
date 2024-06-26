@@ -15,6 +15,7 @@ import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.ElPrisetJustNuPrice;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -59,23 +60,24 @@ public class ElPrisetJustNuPriceUpdater {
     private void getContent(final PriceZone priceZone) {
 
         try {
+            List<Calendar> days = new ArrayList<>();
+
             Date now = dateProvider.now();
             Calendar today = Calendar.getInstance();
             today.setTime(now);
+            days.add(today);
 
-            Calendar tomorrow = Calendar.getInstance();
-            tomorrow.setTime(today.getTime());
-            tomorrow.add(Calendar.DATE, 1);
+            if (today.get(Calendar.HOUR_OF_DAY) > 22) {
+                // I am not sure of the exact time when tomorrow prices are available, but start trying after 2200
+                Calendar tomorrow = Calendar.getInstance();
+                tomorrow.setTime(today.getTime());
+                tomorrow.add(Calendar.DATE, 1);
+                days.add(tomorrow);
+            }
 
-            List.of(today, tomorrow).stream()
+            days.stream()
                     .forEach(calendar -> {
-                        ElPrisetJustNuPrice[] prices = client.getPrices(
-                                String.valueOf(calendar.get(Calendar.YEAR)),
-                                String.format("%02d", 1 + calendar.get(Calendar.MONTH)),
-                                String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)),
-                                priceZone.name());
-
-                        Arrays.stream(prices)
+                        Arrays.stream(getPrices(priceZone, calendar))
                                 .forEach(price -> {
                                     Optional<Price> optionalPrice = toPrice(priceZone, price);
                                     if (optionalPrice.isPresent()) {
@@ -89,10 +91,35 @@ public class ElPrisetJustNuPriceUpdater {
                 // this is normal early in the day as prices are not yet set for the next day
                 log.trace("Not found: {}", e.getMessage());
             } else {
-                log.error("Not found: {}", e.getMessage(), e);
+                log.error("HTTP status: {}: {}", e.getStatusCode(), e.getMessage(), e);
             }
         } catch (Exception e) {
             log.error("Error calling {}: {}", PriceSource.ELPRISETJUSTNU.name(), e.getMessage(), e);
+        }
+
+    }
+
+    private ElPrisetJustNuPrice[] getPrices(
+            PriceZone priceZone,
+            Calendar calendar) {
+
+        final String year = String.valueOf(calendar.get(Calendar.YEAR));
+        final String month = String.format("%02d", 1 + calendar.get(Calendar.MONTH));
+        final String day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
+
+        try {
+            return client.getPrices(
+                    year,
+                    month,
+                    day,
+                    priceZone.name());
+        } catch (Exception e) {
+            log.error("Failed to get prices for {} {}-{}-{}",
+                    priceZone.name(),
+                    year,
+                    month,
+                    day);
+            throw new RuntimeException(e);
         }
 
     }
