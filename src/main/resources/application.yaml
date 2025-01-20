@@ -1,0 +1,36 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+cors:
+  allowed-origins:
+    - http://localhost:8080
+    - https://fgsfgsdfgsdf-lz.a.run.app
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  allow-credentials: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: "always"
+
+ntp:
+  hostname: se.pool.ntp.org
