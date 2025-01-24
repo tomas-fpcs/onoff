@@ -2,12 +2,16 @@
 package se.fpcs.elpris.onoff.price.source.elprisetjustnu.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import java.util.Date;
 
 @Value
+@NoArgsConstructor(force = true)
+@AllArgsConstructor
 @Builder
 public class ElPrisetJustNuPrice {
 

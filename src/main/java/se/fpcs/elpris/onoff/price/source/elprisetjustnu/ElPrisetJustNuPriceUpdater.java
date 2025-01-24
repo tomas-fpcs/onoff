@@ -1,5 +1,6 @@
 package se.fpcs.elpris.onoff.price.source.elprisetjustnu;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,10 @@ public class ElPrisetJustNuPriceUpdater {
         this.client = client;
         this.priceService = priceService;
         this.priceUpdaterStatus = priceUpdaterStatus;
+    }
+
+    @PostConstruct
+    public void initialize() {
         refreshPrices();
     }
 
@@ -98,7 +103,7 @@ public class ElPrisetJustNuPriceUpdater {
 
     }
 
-    private Optional<ElPrisetJustNuPrice[]> getPrices(
+    protected Optional<ElPrisetJustNuPrice[]> getPrices(
             PriceZone priceZone,
             Calendar calendar) {
 
@@ -123,7 +128,7 @@ public class ElPrisetJustNuPriceUpdater {
 
     }
 
-    private Optional<PriceForHour> toPrice(PriceZone priceZone, ElPrisetJustNuPrice elPrisetJustNuPrice) {
+    protected Optional<PriceForHour> toPrice(PriceZone priceZone, ElPrisetJustNuPrice elPrisetJustNuPrice) {
 
         try {
 
@@ -148,7 +153,7 @@ public class ElPrisetJustNuPriceUpdater {
 
     }
 
-    private void save(PriceForHour priceForHour) {
+    protected void save(PriceForHour priceForHour) {
 
         try {
             priceService.save(priceForHour);
