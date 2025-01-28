@@ -41,12 +41,13 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 @Log4j2
 public class PriceService {
 
-    public static final String MONGODB_CONNECTION_STRING_NAME = "MONGODB_CONNECTION_STRING";
+    private static final String MONGODB_CONNECTION_STRING_NAME = "MONGODB_CONNECTION_STRING";
     private static final String MONGODB_CONNECTION_STRING = System.getenv(MONGODB_CONNECTION_STRING_NAME);
-
     private static final String PRICES_COLLECTION_NAME = "prices";
 
     private final ObjectMapper objectMapper;
+
+    private final MongoClientSettings mongoClientSettings;
     private MongoClient mongoClient;
 
     @SuppressWarnings("java:S1640")
@@ -67,6 +68,21 @@ public class PriceService {
         om.setTimeZone(Constants.defaultTimeZone);
         this.objectMapper = om;
 
+        ServerApi serverApi = ServerApi.builder()
+                .version(ServerApiVersion.V1)
+                .build();
+
+        CodecRegistry pojoCodecRegistry = fromRegistries(
+                MongoClientSettings.getDefaultCodecRegistry(),
+                fromProviders(PojoCodecProvider.builder().automatic(true).build())
+        );
+
+        this.mongoClientSettings = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(MONGODB_CONNECTION_STRING))
+                .serverApi(serverApi)
+                .codecRegistry(pojoCodecRegistry)
+                .build();
+
     }
 
     @PostConstruct
@@ -74,30 +90,20 @@ public class PriceService {
         initMongoDB();
     }
 
-    //TODO need to call again if connection fails??
     private void initMongoDB() {
 
         log.trace("Initializing MongoDB connection");
 
         try {
-            ServerApi serverApi = ServerApi.builder()
-                    .version(ServerApiVersion.V1)
-                    .build();
-
-            CodecRegistry pojoCodecRegistry = fromRegistries(
-                    MongoClientSettings.getDefaultCodecRegistry(),
-                    fromProviders(PojoCodecProvider.builder().automatic(true).build())
-            );
-
-            MongoClientSettings settings = MongoClientSettings.builder()
-                    .applyConnectionString(new ConnectionString(MONGODB_CONNECTION_STRING))
-                    .serverApi(serverApi)
-                    .codecRegistry(pojoCodecRegistry)
-                    .build();
-
-            this.mongoClient = MongoClients.create(settings);
+            this.mongoClient = MongoClients.create(mongoClientSettings);
             log.trace("Created mongoClient:{}", mongoClient);
+        } catch (Exception e) {
+            log.error("Exception creating mongoClient: {} Message: {}",
+                    e.getClass().getSimpleName(),
+                    e.getMessage());
+        }
 
+        try {
             Arrays.stream(PriceSource.values())
                     .forEach(priceSource -> {
                         MongoCollection<Document> prices =
@@ -111,16 +117,14 @@ public class PriceService {
                         log.trace("Added MongoDB collection for PriceSource: {}", priceSource.name());
                     });
         } catch (Exception e) {
-            log.error("Exception initializing connection to MongoDB: {} Message: {}",
+            log.error("Exception initializing collections in MongoDB: {} Message: {}",
                     e.getClass().getSimpleName(),
                     e.getMessage());
         }
 
-
         try {
-            // Send a ping to confirm a successful connection
-            MongoDatabase database = mongoClient.getDatabase("admin");
-            database.runCommand(new Document("ping", 1));
+            mongoClient.getDatabase("admin")
+                    .runCommand(new Document("ping", 1));
             log.info("Successfully connected to MongoDB");
         } catch (Exception e) {
             log.error("Exception pinging MongoDB: {} Message: {}",
@@ -136,16 +140,15 @@ public class PriceService {
             final String priceDay,
             final String priceHour) {
 
-        PriceForHour priceForHour = this.mongoClient
-                .getDatabase(priceSource.name())
-                .getCollection(PRICES_COLLECTION_NAME, PriceForHour.class)
-                .find(Filters.and(
-                        Filters.eq("price_zone", priceZone.name()),
-                        Filters.eq("price_day", priceDay),
-                        Filters.eq("price_hour", priceHour)
-                )).first();
         return Optional.ofNullable(
-                priceForHour);
+                this.mongoClient
+                        .getDatabase(priceSource.name())
+                        .getCollection(PRICES_COLLECTION_NAME, PriceForHour.class)
+                        .find(Filters.and(
+                                Filters.eq("price_zone", priceZone.name()),
+                                Filters.eq("price_day", priceDay),
+                                Filters.eq("price_hour", priceHour)
+                        )).first());
 
 
     }
@@ -153,11 +156,9 @@ public class PriceService {
     public void save(PriceForHour priceForHour) {
 
         try {
-            MongoCollection<Document> collection = pricesCollections.get(priceForHour.getPriceSource());
-            String json = objectMapper.writeValueAsString(priceForHour);
-            collection
+            pricesCollections.get(priceForHour.getPriceSource())
                     .insertOne(Document.parse(
-                            json));
+                            objectMapper.writeValueAsString(priceForHour)));
 
         } catch (MongoWriteException e) {
             if (e.getMessage().contains("E11000")) {
