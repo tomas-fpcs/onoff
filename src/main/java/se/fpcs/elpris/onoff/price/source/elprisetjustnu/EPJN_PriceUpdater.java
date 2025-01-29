@@ -14,7 +14,7 @@ import se.fpcs.elpris.onoff.price.PriceService;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
-import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.ElPrisetJustNuPrice;
+import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.EPJN_Price;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,20 +23,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.ElPrisetJustNuPriceDateUtil.toHour;
-import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.ElPrisetJustNuPriceDateUtil.toYYYYMMDD;
+import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toHour;
+import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toTimeMs;
+import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toYYYYMMDD;
 
 @Service
 @Log4j2
 @Profile("!test")
-public class ElPrisetJustNuPriceUpdater {
+public class EPJN_PriceUpdater {
 
-    private ElPrisetJustNuClient client;
+    private EPJN_Client client;
     private final PriceService priceService;
     private final PriceUpdaterStatus priceUpdaterStatus;
 
-    public ElPrisetJustNuPriceUpdater(
-            ElPrisetJustNuClient client,
+    public EPJN_PriceUpdater(
+            EPJN_Client client,
             PriceService priceService,
             PriceUpdaterStatus priceUpdaterStatus) {
         this.client = client;
@@ -45,10 +46,6 @@ public class ElPrisetJustNuPriceUpdater {
     }
 
     @PostConstruct
-    public void initialize() {
-        refreshPrices();
-    }
-
     @Scheduled(cron = "0 0 * * * *") // every hour
     public void refreshPrices() {
 
@@ -78,22 +75,26 @@ public class ElPrisetJustNuPriceUpdater {
 
             days.stream()
                     .forEach(day -> {
-                        Optional<ElPrisetJustNuPrice[]> optionalElPrisetJustNuPrices = getPrices(priceZone, day);
-                        if (optionalElPrisetJustNuPrices.isPresent()) {
-                            Arrays.stream(optionalElPrisetJustNuPrices.get())
-                                    .forEach(elPrisetJustNuPrice -> {
-                                        Optional<PriceForHour> optionalPrice = toPrice(priceZone, elPrisetJustNuPrice);
+                        Optional<EPJN_Price[]> optionalEPJNs = getPrices(priceZone, day);
+                        if (optionalEPJNs.isPresent()) {
+                            Arrays.stream(optionalEPJNs.get())
+                                    .forEach(EPJNPrice -> {
+                                        Optional<PriceForHour> optionalPrice = toPrice(priceZone, EPJNPrice);
                                         if (optionalPrice.isPresent()) {
                                             save(optionalPrice.get());
                                         }
                                     });
                         }
                     });
-            log.trace("Prices saved");
+            if (log.isTraceEnabled()) {
+                log.trace("Prices saved");
+            }
         } catch (WebClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 // this is normal early in the day as prices are not yet set for the next day
-                log.trace("Not found: {}", e.getMessage());
+                if (log.isTraceEnabled()) {
+                    log.trace("Not found: {}", e.getMessage());
+                }
             } else {
                 log.error("HTTP status: {}: {}", e.getStatusCode(), e.getMessage(), e);
             }
@@ -103,7 +104,7 @@ public class ElPrisetJustNuPriceUpdater {
 
     }
 
-    protected Optional<ElPrisetJustNuPrice[]> getPrices(
+    protected Optional<EPJN_Price[]> getPrices(
             PriceZone priceZone,
             Calendar calendar) {
 
@@ -128,24 +129,24 @@ public class ElPrisetJustNuPriceUpdater {
 
     }
 
-    protected Optional<PriceForHour> toPrice(PriceZone priceZone, ElPrisetJustNuPrice elPrisetJustNuPrice) {
+    protected Optional<PriceForHour> toPrice(PriceZone priceZone, EPJN_Price EPJNPrice) {
 
         try {
-
             return Optional.of(
                     PriceForHour.builder()
                             .priceSource(PriceSource.ELPRISETJUSTNU)
                             .priceZone(priceZone)
-                            .sekPerKWh(elPrisetJustNuPrice.getSekPerKWh())
-                            .eurPerKWh(elPrisetJustNuPrice.getEurPerKWh())
-                            .exchangeRate(elPrisetJustNuPrice.getExr())
-                            .priceDay(toYYYYMMDD(elPrisetJustNuPrice.getTimeStart()))
-                            .priceHour(toHour(elPrisetJustNuPrice.getTimeStart()))
+                            .sekPerKWh(EPJNPrice.getSekPerKWh())
+                            .eurPerKWh(EPJNPrice.getEurPerKWh())
+                            .exchangeRate(EPJNPrice.getExr())
+                            .priceTimeMs(toTimeMs(EPJNPrice.getTimeStart()))
+                            .priceDay(toYYYYMMDD(EPJNPrice.getTimeStart()))
+                            .priceHour(toHour(EPJNPrice.getTimeStart()))
                             .priceTimeZone(Constants.defaultTimeZone.getID())
                             .build());
         } catch (Exception e) {
             log.error("Error transforming {} to {}: {}",
-                    ElPrisetJustNuPrice.class.getSimpleName(),
+                    EPJN_Price.class.getSimpleName(),
                     PriceForHour.class.getSimpleName(),
                     e.getMessage());
             return Optional.empty();

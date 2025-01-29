@@ -3,7 +3,7 @@ package se.fpcs.elpris.onoff.rest;
 import org.springframework.stereotype.Component;
 import se.fpcs.elpris.onoff.OnOffService;
 import se.fpcs.elpris.onoff.price.PriceSource;
-import se.fpcs.elpris.onoff.price.source.elprisetjustnu.OnOffServiceElprisetJustNu;
+import se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_OnOffService;
 
 /**
  * This class is in preparation to support multiple price provider
@@ -11,12 +11,12 @@ import se.fpcs.elpris.onoff.price.source.elprisetjustnu.OnOffServiceElprisetJust
 @Component
 public class OnOffServiceProvider {
 
-    private final OnOffServiceElprisetJustNu onOffServiceElprisetJustNu;
+    private final EPJN_OnOffService epjnOnOffService;
 
     public OnOffServiceProvider(
-            OnOffServiceElprisetJustNu onOffServiceElprisetJustNu
+            EPJN_OnOffService epjnOnOffService
     ) {
-        this.onOffServiceElprisetJustNu = onOffServiceElprisetJustNu;
+        this.epjnOnOffService = epjnOnOffService;
     }
 
     @SuppressWarnings("java:S112")
@@ -27,7 +27,7 @@ public class OnOffServiceProvider {
                 priceSource;
 
         if (priceSource == PriceSource.ELPRISETJUSTNU) {
-            return onOffServiceElprisetJustNu;
+            return epjnOnOffService;
         }
 
         /**

@@ -7,13 +7,11 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 
-import java.util.Date;
-
 @Value
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Builder
-public class ElPrisetJustNuPrice {
+public class EPJN_Price {
 
     @JsonProperty("SEK_per_kWh")
     public Double sekPerKWh;

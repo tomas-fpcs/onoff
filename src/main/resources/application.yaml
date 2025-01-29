@@ -34,3 +34,8 @@ management:
 
 ntp:
   hostname: se.pool.ntp.org
+
+logging:
+  level:
+    root: INFO
+    se.fpcs: TRACE

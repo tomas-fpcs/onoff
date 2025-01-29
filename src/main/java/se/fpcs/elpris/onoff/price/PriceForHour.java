@@ -40,6 +40,11 @@ public class PriceForHour {
     public Double exchangeRate;
 
     @NotNull
+    @BsonProperty("price_time_ms")
+    @JsonProperty(value = "price_time_ms", required = true)
+    public Long priceTimeMs;
+
+    @NotNull
     @BsonProperty("price_day")
     @JsonProperty(value = "price_day", required = true)
     public String priceDay;

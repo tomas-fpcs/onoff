@@ -10,13 +10,12 @@ import se.fpcs.elpris.onoff.price.PriceService;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
-import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.ElPrisetJustNuPrice;
+import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.EPJN_Price;
 
 import java.util.Calendar;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
@@ -26,10 +25,10 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ElPrisetJustNuPriceUpdaterTest {
+class EPJN_PriceUpdaterTest {
 
     @Mock
-    private ElPrisetJustNuClient client;
+    private EPJN_Client client;
 
     @Mock
     private PriceService priceService;
@@ -37,16 +36,17 @@ class ElPrisetJustNuPriceUpdaterTest {
     @Mock
     private PriceUpdaterStatus priceUpdaterStatus;
 
-    private ElPrisetJustNuPriceUpdater priceUpdater;
+    private EPJN_PriceUpdater priceUpdater;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        priceUpdater = new ElPrisetJustNuPriceUpdater(client, priceService, priceUpdaterStatus);
+        priceUpdater = new EPJN_PriceUpdater(client, priceService, priceUpdaterStatus);
     }
 
     @Test
-    void refreshPrices_shouldCallGetContentForEachPriceZone() {
+    void shouldCallGetContentForEachPriceZone() {
+
         priceUpdater.refreshPrices();
 
         for (PriceZone priceZone : PriceZone.values()) {
@@ -58,58 +58,60 @@ class ElPrisetJustNuPriceUpdaterTest {
 
     @Test
     void getPrices_shouldReturnPrices_whenClientReturnsValidData() {
-        ElPrisetJustNuPrice[] mockPrices = new ElPrisetJustNuPrice[]{new ElPrisetJustNuPrice()};
+        EPJN_Price[] mockPrices = new EPJN_Price[]{new EPJN_Price()};
         when(client.getPrices(anyString(), anyString(), anyString(), anyString())).thenReturn(mockPrices);
 
         Calendar calendar = Calendar.getInstance();
-        Optional<ElPrisetJustNuPrice[]> result = priceUpdater.getPrices(PriceZone.SE1, calendar);
+        Optional<EPJN_Price[]> result = priceUpdater.getPrices(PriceZone.SE1, calendar);
 
         assertTrue(result.isPresent());
         assertEquals(mockPrices, result.get());
     }
 
     @Test
-    void getPrices_shouldHandleExceptions_andReturnEmptyOptional() {
+    void shouldHandleExceptionsAndReturnEmptyOptional() {
+
         when(client.getPrices(anyString(), anyString(), anyString(), anyString()))
                 .thenThrow(new RuntimeException("Test exception"));
 
-        Calendar calendar = Calendar.getInstance();
-        Optional<ElPrisetJustNuPrice[]> result = priceUpdater.getPrices(PriceZone.SE1, calendar);
+        Optional<EPJN_Price[]> result = priceUpdater.getPrices(PriceZone.SE1, Calendar.getInstance());
 
-        assertFalse(result.isPresent());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void toPrice_shouldTransformElPrisetJustNuPriceToPriceForHour() {
-        ElPrisetJustNuPrice mockElPrice = ElPrisetJustNuPrice.builder()
+    void shouldTransformEPJNToPriceForHour() {
+
+        EPJN_Price mockPrice = EPJN_Price.builder()
                 .sekPerKWh(1.5)
                 .eurPerKWh(0.15)
                 .exr(10.0)
-                .timeStart("" + System.currentTimeMillis())
+                .timeStart("2025-01-20T00:00:00+01:00")
                 .build();
 
-        Optional<PriceForHour> result = priceUpdater.toPrice(PriceZone.SE1, mockElPrice);
+        Optional<PriceForHour> result = priceUpdater.toPrice(PriceZone.SE1, mockPrice);
 
         assertTrue(result.isPresent());
         PriceForHour priceForHour = result.get();
         assertEquals(PriceZone.SE1, priceForHour.getPriceZone());
         assertEquals(PriceSource.ELPRISETJUSTNU, priceForHour.getPriceSource());
+        assertEquals(1737327600000L, priceForHour.getPriceTimeMs());
     }
 
     @Test
-    void save_shouldCallPriceServiceSave() {
+    void shouldCallPriceServiceSave() {
+
         PriceForHour mockPrice = PriceForHour.builder().build();
-
         priceUpdater.save(mockPrice);
-
         verify(priceService).save(mockPrice);
     }
 
     @Test
-    void save_shouldThrowDatabaseOperationException_onSaveFailure() {
+    void shouldThrowDatabaseOperationExceptionOnSaveFailure() {
+
         PriceForHour mockPrice = PriceForHour.builder().build();
         doThrow(new RuntimeException("Database error")).when(priceService).save(mockPrice);
-
         assertThrows(DatabaseOperationException.class, () -> priceUpdater.save(mockPrice));
+
     }
 }

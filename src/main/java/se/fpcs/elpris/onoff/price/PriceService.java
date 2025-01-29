@@ -9,11 +9,13 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.result.DeleteResult;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -92,11 +94,15 @@ public class PriceService {
 
     private void initMongoDB() {
 
-        log.trace("Initializing MongoDB connection");
+        if (log.isTraceEnabled()) {
+            log.trace("Initializing MongoDB connection");
+        }
 
         try {
             this.mongoClient = MongoClients.create(mongoClientSettings);
-            log.trace("Created mongoClient:{}", mongoClient);
+            if (log.isTraceEnabled()) {
+                log.trace("Created mongoClient:{}", mongoClient);
+            }
         } catch (Exception e) {
             log.error("Exception creating mongoClient: {} Message: {}",
                     e.getClass().getSimpleName(),
@@ -114,7 +120,9 @@ public class PriceService {
                                 Indexes.ascending("price_zone", "price_day", "price_hour"),
                                 new IndexOptions().name("price_idx_1").unique(true));
                         pricesCollections.put(priceSource, prices);
-                        log.trace("Added MongoDB collection for PriceSource: {}", priceSource.name());
+                        if (log.isTraceEnabled()) {
+                            log.trace("Added MongoDB collection for PriceSource: {}", priceSource.name());
+                        }
                     });
         } catch (Exception e) {
             log.error("Exception initializing collections in MongoDB: {} Message: {}",
@@ -162,7 +170,9 @@ public class PriceService {
 
         } catch (MongoWriteException e) {
             if (e.getMessage().contains("E11000")) {
-                log.trace("Document already exist in collection");
+                if (log.isTraceEnabled()) {
+                    log.trace("Document already exist in collection");
+                }
             } else {
                 log.error("Error writing document: {}", e.getMessage());
             }
@@ -172,6 +182,27 @@ public class PriceService {
             log.error("Exception: {}", e.getMessage());
         }
 
+    }
+
+    /**
+     * Deletes obsolete prices from the database
+     */
+    @Scheduled(fixedRate = 24 * 60 * 60 * 1000) // 24 hours in milliseconds
+    public void cleanUpDatabase() {
+
+        final long twoDaysAgo = System.currentTimeMillis() - 48 * 60 * 60 * 1000;
+        final var filter = Filters.lt("price_time_ms", twoDaysAgo);
+
+        pricesCollections.entrySet().stream()
+                .forEach(entry -> {
+                    DeleteResult deleteResult = entry.getValue().deleteMany(filter);
+                    if (log.isTraceEnabled()) {
+                        log.trace(
+                                "Deleted {} old prices from source {}",
+                                deleteResult.getDeletedCount(),
+                                entry.getKey().name());
+                    }
+                });
     }
 
 

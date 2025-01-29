@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import reactor.netty.http.client.HttpClient;
-import se.fpcs.elpris.onoff.price.source.elprisetjustnu.ElPrisetJustNuClient;
+import se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_Client;
 
 @Configuration
 @Log4j2
@@ -42,10 +42,10 @@ public class OnOffConfiguration {
 
 
     @Bean
-    public ElPrisetJustNuClient elPrisetJustNuClient(WebClient webClient) {
+    public EPJN_Client elPrisetJustNuClient(WebClient webClient) {
         return HttpServiceProxyFactory
                 .builderFor(WebClientAdapter.create(webClient))
                 .build()
-                .createClient(ElPrisetJustNuClient.class);
+                .createClient(EPJN_Client.class);
     }
 }

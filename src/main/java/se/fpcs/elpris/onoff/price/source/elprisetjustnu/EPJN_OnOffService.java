@@ -18,18 +18,18 @@ import java.util.Date;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
-import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.ElPrisetJustNuPriceDateUtil.toHour;
-import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.ElPrisetJustNuPriceDateUtil.toYYYYMMDD;
+import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toHour;
+import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toYYYYMMDD;
 
 @Service
 @Log4j2
-public class OnOffServiceElprisetJustNu implements OnOffService {
+public class EPJN_OnOffService implements OnOffService {
 
     private final PriceService priceService;
     private final PriceUpdaterStatus priceUpdaterStatus;
 
     @Autowired
-    public OnOffServiceElprisetJustNu(
+    public EPJN_OnOffService(
             PriceUpdaterStatus priceUpdaterStatus,
             PriceService priceService) {
         this.priceUpdaterStatus = priceUpdaterStatus;
