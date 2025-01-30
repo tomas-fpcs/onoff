@@ -1,7 +1,7 @@
 package se.fpcs.elpris.onoff;
 
 import se.fpcs.elpris.onoff.price.PriceZone;
-import se.fpcs.elpris.onoff.security.User;
+import se.fpcs.elpris.onoff.user.User;
 
 public interface OnOffService {
 

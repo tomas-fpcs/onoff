@@ -6,6 +6,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.Min;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,28 +19,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import se.fpcs.elpris.onoff.OnOff;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceZone;
-import se.fpcs.elpris.onoff.security.User;
+import se.fpcs.elpris.onoff.user.User;
 import se.fpcs.elpris.onoff.validation.ValidEnum;
 
 import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
 
-
 @Controller
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Log4j2
 @SuppressWarnings("java:S6833") // this class is NOT a REST controller
 public class OnOffController {
 
+    @Autowired
     private OnOffServiceProvider onOffServiceProvider;
-
-    public OnOffController(
-            OnOffServiceProvider onOffServiceProvider) {
-        this.onOffServiceProvider = onOffServiceProvider;
-    }
 
     @Operation(summary = "Determine if device should be on")
     @ApiResponse(responseCode = "200",
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = OnOff.class))})
-    //@ApiResponse(responseCode = "404", description = "User not found", content = @Content)
     @GetMapping(value = ONOFF_V1 + "/onoff")
     @ResponseBody
     @SuppressWarnings("java:S1452")
@@ -63,7 +63,12 @@ public class OnOffController {
                 priceZone,
                 markupPercent,
                 maxPriceOre,
-                User.builder().name("DevUser").build()); //TODO implement real users
+                User.builder()
+                        .firstName("Test")
+                        .lastName("Testsson")
+                        .email("test@example.com")
+                        .apiKey("foo")
+                        .build()); //TODO implement real users
 
         if (outputType == null || outputType == OutputType.JSON) {
             return ResponseEntity.ok()

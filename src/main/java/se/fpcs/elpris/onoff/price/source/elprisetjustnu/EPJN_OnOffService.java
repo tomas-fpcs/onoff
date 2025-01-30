@@ -12,7 +12,7 @@ import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.price.PricesNotRetrievedYetException;
-import se.fpcs.elpris.onoff.security.User;
+import se.fpcs.elpris.onoff.user.User;
 
 import java.util.Date;
 import java.util.Optional;
@@ -72,7 +72,6 @@ public class EPJN_OnOffService implements OnOffService {
                 .maxPrice(maxPriceOre)
                 .priceSpot(Math.round(priceSpotFloat))
                 .priceSupplier(priceSupplierOre)
-                .userName(user.getName())
                 .serverTime(dateNow.toString())
                 .build();
 

@@ -18,12 +18,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import se.fpcs.elpris.onoff.Constants;
 import se.fpcs.elpris.onoff.MongoDbService;
+import se.fpcs.elpris.onoff.user.User;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Profile("!test")
@@ -32,25 +35,12 @@ public class PriceService extends MongoDbService {
 
     private static final String PRICES_COLLECTION_NAME = "prices";
 
-    private final ObjectMapper objectMapper;
-
     @SuppressWarnings("java:S1640")
     Map<PriceSource, MongoCollection<Document>> pricesCollections = new HashMap<>();
-
-    public PriceService() {
-
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new JavaTimeModule());
-        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        om.setTimeZone(Constants.defaultTimeZone);
-        this.objectMapper = om;
-
-    }
 
     @PostConstruct
     @Override
     protected void initMongoDB() {
-
         super.initMongoDB();
 
         try {
@@ -97,24 +87,9 @@ public class PriceService extends MongoDbService {
 
     public void save(PriceForHour priceForHour) {
 
-        try {
-            pricesCollections.get(priceForHour.getPriceSource())
-                    .insertOne(Document.parse(
-                            objectMapper.writeValueAsString(priceForHour)));
-
-        } catch (MongoWriteException e) {
-            if (e.getMessage().contains("E11000")) {
-                if (log.isTraceEnabled()) {
-                    log.trace("Document already exist in collection");
-                }
-            } else {
-                log.error("Error writing document: {}", e.getMessage());
-            }
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing instance to JSON: {} Message: {}", priceForHour, e.getMessage());
-        } catch (Exception e) {
-            log.error("Exception: {}", e.getMessage());
-        }
+        super.save(
+                pricesCollections.get(priceForHour.getPriceSource()),
+                priceForHour);
 
     }
 
@@ -139,8 +114,37 @@ public class PriceService extends MongoDbService {
                 });
     }
 
-    public List<PriceForHour> findAll() {
-        return List.of(); //TODO implement
+    public Map<PriceSource, List<PriceForHour>> findAll(PriceSource filterPriceSource) {
+
+        List<PriceSource> priceSources =
+                filterPriceSource == null ?
+                        Arrays.asList(PriceSource.values()) :
+                        List.of(filterPriceSource);
+
+        return priceSources.stream()
+                .collect(Collectors.toMap(
+                        priceSource -> priceSource, // Key: PriceSource
+                        source -> this.pricesCollections.get(source)
+                                .find()
+                                .map(this::convertToPriceForHour)
+                                .into(new ArrayList<>())
+                ));
+
     }
+
+    private PriceForHour convertToPriceForHour(Document doc) {
+        return PriceForHour.builder()
+                .priceSource(PriceSource.valueOf(doc.getString("price_source"))) // Enum mapping
+                .priceZone(PriceZone.valueOf(doc.getString("price_zone"))) // Enum mapping
+                .sekPerKWh(doc.getDouble("sek_per_kwh"))
+                .eurPerKWh(doc.getDouble("eur_per_kwh"))
+                .exchangeRate(doc.getDouble("exchange_rate"))
+                .priceTimeMs(doc.getLong("price_time_ms")) // Milliseconds timestamp
+                .priceDay(doc.getString("price_day"))
+                .priceHour(doc.getString("price_hour"))
+                .priceTimeZone(doc.getString("price_time_zone"))
+                .build();
+    }
+
 
 }
