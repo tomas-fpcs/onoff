@@ -12,11 +12,12 @@ import com.mongodb.client.model.Indexes;
 import com.mongodb.client.result.DeleteResult;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.Document;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import se.fpcs.elpris.onoff.Constants;
+import se.fpcs.elpris.onoff.MongoDbService;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,45 +25,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ServerApi;
-import com.mongodb.ServerApiVersion;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
-import se.fpcs.elpris.onoff.Constants;
-
-import static java.util.Objects.requireNonNull;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-
 @Service
 @Profile("!test")
 @Log4j2
-public class PriceService {
+public class PriceService extends MongoDbService {
 
-    private static final String MONGODB_CONNECTION_STRING_NAME = "MONGODB_CONNECTION_STRING";
-    private static final String MONGODB_CONNECTION_STRING = System.getenv(MONGODB_CONNECTION_STRING_NAME);
     private static final String PRICES_COLLECTION_NAME = "prices";
 
     private final ObjectMapper objectMapper;
 
-    private final MongoClientSettings mongoClientSettings;
-    private MongoClient mongoClient;
-
     @SuppressWarnings("java:S1640")
     Map<PriceSource, MongoCollection<Document>> pricesCollections = new HashMap<>();
 
-    public List<PriceForHour> findAll() {
-        return List.of(); //TODO implement
-    }
-
     public PriceService() {
-
-        requireNonNull(MONGODB_CONNECTION_STRING,
-                "Environment variable " + MONGODB_CONNECTION_STRING_NAME + " not set");
 
         ObjectMapper om = new ObjectMapper();
         om.registerModule(new JavaTimeModule());
@@ -70,44 +45,13 @@ public class PriceService {
         om.setTimeZone(Constants.defaultTimeZone);
         this.objectMapper = om;
 
-        ServerApi serverApi = ServerApi.builder()
-                .version(ServerApiVersion.V1)
-                .build();
-
-        CodecRegistry pojoCodecRegistry = fromRegistries(
-                MongoClientSettings.getDefaultCodecRegistry(),
-                fromProviders(PojoCodecProvider.builder().automatic(true).build())
-        );
-
-        this.mongoClientSettings = MongoClientSettings.builder()
-                .applyConnectionString(new ConnectionString(MONGODB_CONNECTION_STRING))
-                .serverApi(serverApi)
-                .codecRegistry(pojoCodecRegistry)
-                .build();
-
     }
 
     @PostConstruct
-    public void initialize() {
-        initMongoDB();
-    }
+    @Override
+    protected void initMongoDB() {
 
-    private void initMongoDB() {
-
-        if (log.isTraceEnabled()) {
-            log.trace("Initializing MongoDB connection");
-        }
-
-        try {
-            this.mongoClient = MongoClients.create(mongoClientSettings);
-            if (log.isTraceEnabled()) {
-                log.trace("Created mongoClient:{}", mongoClient);
-            }
-        } catch (Exception e) {
-            log.error("Exception creating mongoClient: {} Message: {}",
-                    e.getClass().getSimpleName(),
-                    e.getMessage());
-        }
+        super.initMongoDB();
 
         try {
             Arrays.stream(PriceSource.values())
@@ -126,16 +70,6 @@ public class PriceService {
                     });
         } catch (Exception e) {
             log.error("Exception initializing collections in MongoDB: {} Message: {}",
-                    e.getClass().getSimpleName(),
-                    e.getMessage());
-        }
-
-        try {
-            mongoClient.getDatabase("admin")
-                    .runCommand(new Document("ping", 1));
-            log.info("Successfully connected to MongoDB");
-        } catch (Exception e) {
-            log.error("Exception pinging MongoDB: {} Message: {}",
                     e.getClass().getSimpleName(),
                     e.getMessage());
         }
@@ -205,5 +139,8 @@ public class PriceService {
                 });
     }
 
+    public List<PriceForHour> findAll() {
+        return List.of(); //TODO implement
+    }
 
 }
