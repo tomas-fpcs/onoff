@@ -12,10 +12,6 @@ jobs:
       - name: Checkout your repository
         uses: actions/checkout@v3
 
-      - name: Check if secret is available
-        run: |
-          echo "GH_ACTIONS_TOKEN is set to: ${{ secrets.GH_ACTIONS_TOKEN }}"
-
       - name: Fetch file from external repo
         run: |
           curl -o src/main/resources/google_checks.xml https://raw.githubusercontent.com/checkstyle/checkstyle/refs/heads/master/src/main/resources/google_checks.xml
