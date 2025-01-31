@@ -11,29 +11,29 @@ import se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_OnOffService;
 @Component
 public class OnOffServiceProvider {
 
-    private final EPJN_OnOffService epjnOnOffService;
+  private final EPJN_OnOffService epjnOnOffService;
 
-    public OnOffServiceProvider(
-            EPJN_OnOffService epjnOnOffService
-    ) {
-        this.epjnOnOffService = epjnOnOffService;
+  public OnOffServiceProvider(
+      EPJN_OnOffService epjnOnOffService
+  ) {
+    this.epjnOnOffService = epjnOnOffService;
+  }
+
+  @SuppressWarnings("java:S112")
+  public OnOffService get(PriceSource priceSource) {
+
+    priceSource = priceSource == null ?
+        PriceSource.ELPRISETJUSTNU :
+        priceSource;
+
+    if (priceSource == PriceSource.ELPRISETJUSTNU) {
+      return epjnOnOffService;
     }
 
-    @SuppressWarnings("java:S112")
-    public OnOffService get(PriceSource priceSource) {
-
-        priceSource = priceSource == null ?
-                PriceSource.ELPRISETJUSTNU :
-                priceSource;
-
-        if (priceSource == PriceSource.ELPRISETJUSTNU) {
-            return epjnOnOffService;
-        }
-
-        /**
-         * should never happen as this method would be updated to support any new values in the enum
-         */
-        throw new RuntimeException("Unsupported priceSource: " + priceSource);
-    }
+    /**
+     * should never happen as this method would be updated to support any new values in the enum
+     */
+    throw new RuntimeException("Unsupported priceSource: " + priceSource);
+  }
 
 }

@@ -7,8 +7,8 @@ import se.fpcs.elpris.onoff.price.PriceZone;
 @Component
 public class StringToPriceZoneConverter implements Converter<String, PriceZone> {
 
-    @Override
-    public PriceZone convert(String source) {
-        return PriceZone.valueOf(source.toUpperCase());
-    }
+  @Override
+  public PriceZone convert(String source) {
+    return PriceZone.valueOf(source.toUpperCase());
+  }
 }

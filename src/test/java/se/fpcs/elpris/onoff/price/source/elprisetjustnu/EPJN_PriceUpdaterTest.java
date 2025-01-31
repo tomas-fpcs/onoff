@@ -1,5 +1,17 @@
 package se.fpcs.elpris.onoff.price.source.elprisetjustnu;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Calendar;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -12,106 +24,95 @@ import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.EPJN_Price;
 
-import java.util.Calendar;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 class EPJN_PriceUpdaterTest {
 
-    @Mock
-    private EPJN_Client client;
+  @Mock
+  private EPJN_Client client;
 
-    @Mock
-    private PriceService priceService;
+  @Mock
+  private PriceService priceService;
 
-    @Mock
-    private PriceUpdaterStatus priceUpdaterStatus;
+  @Mock
+  private PriceUpdaterStatus priceUpdaterStatus;
 
-    private EPJN_PriceUpdater priceUpdater;
+  private EPJN_PriceUpdater priceUpdater;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        priceUpdater = new EPJN_PriceUpdater(client, priceService, priceUpdaterStatus);
+  @BeforeEach
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
+    priceUpdater = new EPJN_PriceUpdater(client, priceService, priceUpdaterStatus);
+  }
+
+  @Test
+  void shouldCallGetContentForEachPriceZone() {
+
+    priceUpdater.refreshPrices();
+
+    for (PriceZone priceZone : PriceZone.values()) {
+      verify(client, atLeastOnce()).getPrices(anyString(), anyString(), anyString(),
+          eq(priceZone.name()));
     }
 
-    @Test
-    void shouldCallGetContentForEachPriceZone() {
+    verify(priceUpdaterStatus).setReady(PriceSource.ELPRISETJUSTNU);
+  }
 
-        priceUpdater.refreshPrices();
+  @Test
+  void getPrices_shouldReturnPrices_whenClientReturnsValidData() {
+    EPJN_Price[] mockPrices = new EPJN_Price[]{new EPJN_Price()};
+    when(client.getPrices(anyString(), anyString(), anyString(), anyString())).thenReturn(
+        mockPrices);
 
-        for (PriceZone priceZone : PriceZone.values()) {
-            verify(client, atLeastOnce()).getPrices(anyString(), anyString(), anyString(), eq(priceZone.name()));
-        }
+    Calendar calendar = Calendar.getInstance();
+    Optional<EPJN_Price[]> result = priceUpdater.getPrices(PriceZone.SE1, calendar);
 
-        verify(priceUpdaterStatus).setReady(PriceSource.ELPRISETJUSTNU);
-    }
+    assertTrue(result.isPresent());
+    assertEquals(mockPrices, result.get());
+  }
 
-    @Test
-    void getPrices_shouldReturnPrices_whenClientReturnsValidData() {
-        EPJN_Price[] mockPrices = new EPJN_Price[]{new EPJN_Price()};
-        when(client.getPrices(anyString(), anyString(), anyString(), anyString())).thenReturn(mockPrices);
+  @Test
+  void shouldHandleExceptionsAndReturnEmptyOptional() {
 
-        Calendar calendar = Calendar.getInstance();
-        Optional<EPJN_Price[]> result = priceUpdater.getPrices(PriceZone.SE1, calendar);
+    when(client.getPrices(anyString(), anyString(), anyString(), anyString()))
+        .thenThrow(new RuntimeException("Test exception"));
 
-        assertTrue(result.isPresent());
-        assertEquals(mockPrices, result.get());
-    }
+    Optional<EPJN_Price[]> result = priceUpdater.getPrices(PriceZone.SE1, Calendar.getInstance());
 
-    @Test
-    void shouldHandleExceptionsAndReturnEmptyOptional() {
+    assertTrue(result.isEmpty());
+  }
 
-        when(client.getPrices(anyString(), anyString(), anyString(), anyString()))
-                .thenThrow(new RuntimeException("Test exception"));
+  @Test
+  void shouldTransformEPJNToPriceForHour() {
 
-        Optional<EPJN_Price[]> result = priceUpdater.getPrices(PriceZone.SE1, Calendar.getInstance());
+    EPJN_Price mockPrice = EPJN_Price.builder()
+        .sekPerKWh(1.5)
+        .eurPerKWh(0.15)
+        .exr(10.0)
+        .timeStart("2025-01-20T00:00:00+01:00")
+        .build();
 
-        assertTrue(result.isEmpty());
-    }
+    Optional<PriceForHour> result = priceUpdater.toPrice(PriceZone.SE1, mockPrice);
 
-    @Test
-    void shouldTransformEPJNToPriceForHour() {
+    assertTrue(result.isPresent());
+    PriceForHour priceForHour = result.get();
+    assertEquals(PriceZone.SE1, priceForHour.getPriceZone());
+    assertEquals(PriceSource.ELPRISETJUSTNU, priceForHour.getPriceSource());
+    assertEquals(1737327600000L, priceForHour.getPriceTimeMs());
+  }
 
-        EPJN_Price mockPrice = EPJN_Price.builder()
-                .sekPerKWh(1.5)
-                .eurPerKWh(0.15)
-                .exr(10.0)
-                .timeStart("2025-01-20T00:00:00+01:00")
-                .build();
+  @Test
+  void shouldCallPriceServiceSave() {
 
-        Optional<PriceForHour> result = priceUpdater.toPrice(PriceZone.SE1, mockPrice);
+    PriceForHour mockPrice = PriceForHour.builder().build();
+    priceUpdater.save(mockPrice);
+    verify(priceService).save(mockPrice);
+  }
 
-        assertTrue(result.isPresent());
-        PriceForHour priceForHour = result.get();
-        assertEquals(PriceZone.SE1, priceForHour.getPriceZone());
-        assertEquals(PriceSource.ELPRISETJUSTNU, priceForHour.getPriceSource());
-        assertEquals(1737327600000L, priceForHour.getPriceTimeMs());
-    }
+  @Test
+  void shouldThrowDatabaseOperationExceptionOnSaveFailure() {
 
-    @Test
-    void shouldCallPriceServiceSave() {
+    PriceForHour mockPrice = PriceForHour.builder().build();
+    doThrow(new RuntimeException("Database error")).when(priceService).save(mockPrice);
+    assertThrows(DatabaseOperationException.class, () -> priceUpdater.save(mockPrice));
 
-        PriceForHour mockPrice = PriceForHour.builder().build();
-        priceUpdater.save(mockPrice);
-        verify(priceService).save(mockPrice);
-    }
-
-    @Test
-    void shouldThrowDatabaseOperationExceptionOnSaveFailure() {
-
-        PriceForHour mockPrice = PriceForHour.builder().build();
-        doThrow(new RuntimeException("Database error")).when(priceService).save(mockPrice);
-        assertThrows(DatabaseOperationException.class, () -> priceUpdater.save(mockPrice));
-
-    }
+  }
 }

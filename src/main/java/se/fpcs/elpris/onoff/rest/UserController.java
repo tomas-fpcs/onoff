@@ -1,5 +1,7 @@
 package se.fpcs.elpris.onoff.rest;
 
+import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,40 +20,38 @@ import org.springframework.web.bind.annotation.RestController;
 import se.fpcs.elpris.onoff.user.User;
 import se.fpcs.elpris.onoff.user.UserService;
 
-import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
-
 
 @RestController
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log4j2
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+  @Autowired
+  private UserService userService;
 
-    @Operation(summary = "Create a User")
-    @ApiResponse(responseCode = "200",
-            content = {@Content(mediaType = "application/json",
-                    schema = @Schema(implementation = User.class))})
-    @PostMapping(value = ONOFF_V1 + "/user")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+  @Operation(summary = "Create a User")
+  @ApiResponse(responseCode = "200",
+      content = {@Content(mediaType = "application/json",
+          schema = @Schema(implementation = User.class))})
+  @PostMapping(value = ONOFF_V1 + "/user")
+  public ResponseEntity<?> createUser(@RequestBody User user) {
 
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(createdUser);
-    }
+    User createdUser = userService.createUser(user);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(createdUser);
+  }
 
-    @Operation(summary = "Get all Users")
-    @GetMapping(value = ONOFF_V1 +"/user")
-    @SuppressWarnings("java:S1452")
-    public ResponseEntity<?> findAll() {
+  @Operation(summary = "Get all Users")
+  @GetMapping(value = ONOFF_V1 + "/user")
+  @SuppressWarnings("java:S1452")
+  public ResponseEntity<?> findAll() {
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(userService.findAll());
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(userService.findAll());
 
-    }
+  }
 
 }
 

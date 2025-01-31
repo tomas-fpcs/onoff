@@ -10,5 +10,6 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class NTPProperties {
-    private String hostname;
+
+  private String hostname;
 }

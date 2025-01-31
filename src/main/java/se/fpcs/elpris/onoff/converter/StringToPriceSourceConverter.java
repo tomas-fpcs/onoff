@@ -7,8 +7,8 @@ import se.fpcs.elpris.onoff.price.PriceSource;
 @Component
 public class StringToPriceSourceConverter implements Converter<String, PriceSource> {
 
-    @Override
-    public PriceSource convert(String source) {
-        return PriceSource.valueOf(source.toUpperCase());
-    }
+  @Override
+  public PriceSource convert(String source) {
+    return PriceSource.valueOf(source.toUpperCase());
+  }
 }

@@ -13,15 +13,15 @@ import lombok.Value;
 @Builder
 public class EPJN_Price {
 
-    @JsonProperty("SEK_per_kWh")
-    public Double sekPerKWh;
-    @JsonProperty("EUR_per_kWh")
-    public Double eurPerKWh;
-    @JsonProperty("EXR")
-    public Double exr;
-    @JsonProperty("time_start")
-    public String timeStart;
-    @JsonProperty("time_end")
-    public String timeEnd;
+  @JsonProperty("SEK_per_kWh")
+  public Double sekPerKWh;
+  @JsonProperty("EUR_per_kWh")
+  public Double eurPerKWh;
+  @JsonProperty("EXR")
+  public Double exr;
+  @JsonProperty("time_start")
+  public String timeStart;
+  @JsonProperty("time_end")
+  public String timeEnd;
 
 }

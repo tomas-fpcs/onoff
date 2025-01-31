@@ -8,22 +8,22 @@ import lombok.Value;
 @Builder
 public class OnOff {
 
-    @JsonProperty("on")
-    private boolean on;
+  @JsonProperty("on")
+  private boolean on;
 
-    @JsonProperty("max-price")
-    private int maxPrice;
+  @JsonProperty("max-price")
+  private int maxPrice;
 
-    @JsonProperty("price-spot")
-    private int priceSpot;
+  @JsonProperty("price-spot")
+  private int priceSpot;
 
-    @JsonProperty("price-supplier")
-    private int priceSupplier;
+  @JsonProperty("price-supplier")
+  private int priceSupplier;
 
-    @JsonProperty("user-name")
-    private String userName;
+  @JsonProperty("user-name")
+  private String userName;
 
-    @JsonProperty("server_time")
-    private String serverTime;
+  @JsonProperty("server_time")
+  private String serverTime;
 
 }

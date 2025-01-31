@@ -63,3 +63,9 @@ Data is stored in [MongoDB Cloud](https://cloud.mongodb.com/)
 See Configuration section above.
 
 The application will create a cluster name "Elpris0".
+
+## Development
+
+### Code formatting
+
+Use this [template](intellij-java-google-style.xml) in IntelliJ

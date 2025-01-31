@@ -1,5 +1,7 @@
 package se.fpcs.elpris.onoff.rest;
 
+import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
+
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -13,29 +15,27 @@ import org.springframework.web.bind.annotation.RestController;
 import se.fpcs.elpris.onoff.price.PriceService;
 import se.fpcs.elpris.onoff.price.PriceSource;
 
-import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
-
 
 @RestController
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log4j2
 public class PriceController {
 
-    @Autowired
-    private PriceService priceService;
+  @Autowired
+  private PriceService priceService;
 
-    @Operation(summary = "Get all prices")
-    @GetMapping(value = ONOFF_V1 +"/price")
-    @SuppressWarnings("java:S1452")
-    public ResponseEntity<?> findAll(
-            @RequestParam(value = "priceSource", required = false) PriceSource priceSource
-    ) {
+  @Operation(summary = "Get all prices")
+  @GetMapping(value = ONOFF_V1 + "/price")
+  @SuppressWarnings("java:S1452")
+  public ResponseEntity<?> findAll(
+      @RequestParam(value = "priceSource", required = false) PriceSource priceSource
+  ) {
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(priceService.findAll( priceSource));
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(priceService.findAll(priceSource));
 
-    }
+  }
 
 }
 

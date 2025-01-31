@@ -5,10 +5,10 @@ import se.fpcs.elpris.onoff.user.User;
 
 public interface OnOffService {
 
-    OnOff on(
-            PriceZone priceZone,
-            int markupPercent,
-            int maxPriceOre,
-            User user);
+  OnOff on(
+      PriceZone priceZone,
+      int markupPercent,
+      int maxPriceOre,
+      User user);
 
 }

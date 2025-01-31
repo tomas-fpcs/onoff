@@ -15,28 +15,28 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 @Builder
 public class User {
 
-    @NotNull
-    @BsonProperty("first_name")
-    @JsonProperty(value = "first_name", required = true)
-    private String firstName;
+  @NotNull
+  @BsonProperty("first_name")
+  @JsonProperty(value = "first_name", required = true)
+  private String firstName;
 
-    @NotNull
-    @BsonProperty("last_name")
-    @JsonProperty(value = "last_name", required = true)
-    private String lastName;
+  @NotNull
+  @BsonProperty("last_name")
+  @JsonProperty(value = "last_name", required = true)
+  private String lastName;
 
-    @NotNull
-    @BsonProperty("email")
-    @JsonProperty(value = "email", required = true)
-    private String email;
+  @NotNull
+  @BsonProperty("email")
+  @JsonProperty(value = "email", required = true)
+  private String email;
 
-    @NotNull
-    @BsonProperty("api_key")
-    @JsonProperty(value = "api_key", required = true)
-    @Pattern(
-            regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-            message = "Invalid UUID format"
-    )
-    private String apiKey;
+  @NotNull
+  @BsonProperty("api_key")
+  @JsonProperty(value = "api_key", required = true)
+  @Pattern(
+      regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      message = "Invalid UUID format"
+  )
+  private String apiKey;
 
 }

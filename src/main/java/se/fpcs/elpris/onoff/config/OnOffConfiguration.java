@@ -17,35 +17,35 @@ import se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_Client;
 @Log4j2
 public class OnOffConfiguration {
 
-    @Bean
-    public WebClient webClient() {
+  @Bean
+  public WebClient webClient() {
 
-        try {
-            //TODO should use secure client
-            SslContext context = SslContextBuilder.forClient()
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                    .build();
+    try {
+      //TODO should use secure client
+      SslContext context = SslContextBuilder.forClient()
+          .trustManager(InsecureTrustManagerFactory.INSTANCE)
+          .build();
 
-            HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(context));
+      HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(context));
 
-            return WebClient
-                    .builder()
-                    .clientConnector(new ReactorClientHttpConnector(httpClient))
-                    .baseUrl("https://www.elprisetjustnu.se")
-                    .build();
-        } catch (Exception e) {
-            log.error("Could not create webClient() {}: {}", e.getClass().getName(), e.getMessage(), e);
-            throw new CouldNotCreateWebClientException();
-        }
-
+      return WebClient
+          .builder()
+          .clientConnector(new ReactorClientHttpConnector(httpClient))
+          .baseUrl("https://www.elprisetjustnu.se")
+          .build();
+    } catch (Exception e) {
+      log.error("Could not create webClient() {}: {}", e.getClass().getName(), e.getMessage(), e);
+      throw new CouldNotCreateWebClientException();
     }
 
+  }
 
-    @Bean
-    public EPJN_Client elPrisetJustNuClient(WebClient webClient) {
-        return HttpServiceProxyFactory
-                .builderFor(WebClientAdapter.create(webClient))
-                .build()
-                .createClient(EPJN_Client.class);
-    }
+
+  @Bean
+  public EPJN_Client elPrisetJustNuClient(WebClient webClient) {
+    return HttpServiceProxyFactory
+        .builderFor(WebClientAdapter.create(webClient))
+        .build()
+        .createClient(EPJN_Client.class);
+  }
 }
