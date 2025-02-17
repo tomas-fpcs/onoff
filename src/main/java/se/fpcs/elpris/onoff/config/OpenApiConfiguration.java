@@ -7,11 +7,13 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Log4j2
 public class OpenApiConfiguration {
 
   @Bean
@@ -19,14 +21,21 @@ public class OpenApiConfiguration {
 
     final String url;
     final String serviceName = System.getenv("K_SERVICE");
+    log.info("serviceName: {}", serviceName);
     final String projectId = System.getenv("GOOGLE_CLOUD_PROJECT");
+    log.info("projectId: {}", projectId);
     final String region = System.getenv("K_REGION");
+    log.info("region: {}", region);
+
+
 
     if (serviceName != null && projectId != null && region != null) {
       url = "https://" + serviceName + "-" + projectId + "." + region + ".run.app";
     } else {
       url = "http://localhost:8080";
     }
+
+    log.info("url: {}", url);
 
     return new OpenAPI()
         .addSecurityItem(new SecurityRequirement().addList("bearerAuth")) // Apply globally
