@@ -3,10 +3,8 @@ package se.fpcs.elpris.onoff.rest;
 import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
 
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,12 +15,11 @@ import se.fpcs.elpris.onoff.price.PriceSource;
 
 
 @RestController
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 @Log4j2
 public class PriceController {
 
-  @Autowired
-  private PriceService priceService;
+  private final PriceService priceService;
 
   @Operation(summary = "Get all prices")
   @GetMapping(value = ONOFF_V1 + "/price")

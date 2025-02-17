@@ -1,7 +1,7 @@
 package se.fpcs.elpris.onoff.config;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -14,14 +14,10 @@ import se.fpcs.elpris.onoff.converter.StringToPriceSourceConverter;
 import se.fpcs.elpris.onoff.converter.StringToPriceZoneConverter;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
   private final CorsProperties corsProperties;
-
-  @Autowired
-  public WebConfig(CorsProperties corsProperties) {
-    this.corsProperties = corsProperties;
-  }
 
   @Override
   public void addFormatters(FormatterRegistry registry) {

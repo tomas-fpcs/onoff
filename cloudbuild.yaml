@@ -1,22 +1,22 @@
 steps:
   # Check out the code from GitHub
   - name: 'gcr.io/cloud-builders/git'
-    args: ['clone', 'https://github.com/tomas-fpcs/onoff.git']
+    args: [ 'clone', 'https://github.com/tomas-fpcs/onoff.git' ]
     dir: '/workspace'
 
   # Set up JDK 17 and build the project with Maven
   - name: 'gcr.io/cloud-builders/mvn'
-    args: ['clean', 'install']
+    args: [ 'clean', 'install' ]
     dir: 'onoff'
 
   # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/onoff', '.']
+    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/onoff', '.' ]
     dir: '/workspace/onoff'
 
   # Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/onoff']
+    args: [ 'push', 'gcr.io/$PROJECT_ID/onoff' ]
 
   # Deploy the Docker image to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'

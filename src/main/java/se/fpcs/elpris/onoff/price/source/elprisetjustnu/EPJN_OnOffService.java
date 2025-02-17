@@ -1,13 +1,12 @@
 package se.fpcs.elpris.onoff.price.source.elprisetjustnu;
 
-import static java.util.Objects.requireNonNull;
 import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toHour;
 import static se.fpcs.elpris.onoff.price.source.elprisetjustnu.EPJN_DateUtil.toYYYYMMDD;
 
 import java.util.Date;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.fpcs.elpris.onoff.OnOff;
 import se.fpcs.elpris.onoff.OnOffService;
@@ -21,19 +20,12 @@ import se.fpcs.elpris.onoff.price.PricesNotRetrievedYetException;
 import se.fpcs.elpris.onoff.user.User;
 
 @Service
+@RequiredArgsConstructor
 @Log4j2
 public class EPJN_OnOffService implements OnOffService {
 
   private final PriceService priceService;
   private final PriceUpdaterStatus priceUpdaterStatus;
-
-  @Autowired
-  public EPJN_OnOffService(
-      PriceUpdaterStatus priceUpdaterStatus,
-      PriceService priceService) {
-    this.priceUpdaterStatus = priceUpdaterStatus;
-    this.priceService = requireNonNull(priceService);
-  }
 
   @Override
   public OnOff on(

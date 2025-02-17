@@ -1,4 +1,3 @@
-
 package se.fpcs.elpris.onoff.price.source.elprisetjustnu.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,42 +1,53 @@
 package se.fpcs.elpris.onoff.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import se.fpcs.elpris.onoff.security.Role;
 
+@Document(collection = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
 
-  @NotNull
-  @BsonProperty("first_name")
-  @JsonProperty(value = "first_name", required = true)
-  private String firstName;
+  @Id
+  private String id;
 
-  @NotNull
-  @BsonProperty("last_name")
-  @JsonProperty(value = "last_name", required = true)
-  private String lastName;
-
-  @NotNull
-  @BsonProperty("email")
-  @JsonProperty(value = "email", required = true)
+  private String firstname;
+  private String lastname;
   private String email;
+  private String password;
 
-  @NotNull
-  @BsonProperty("api_key")
-  @JsonProperty(value = "api_key", required = true)
-  @Pattern(
-      regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-      message = "Invalid UUID format"
-  )
-  private String apiKey;
+  private boolean accountNonExpired = true;
+  private boolean accountNonLocked = true;
+  private boolean credentialsNonExpired = true;
+  private boolean enabled = true;
 
+  private Set<Role> roles;
+
+  /**
+   * ✅ Dynamically generates authorities from roles.
+   */
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return roles.stream()
+        .map(role -> new SimpleGrantedAuthority(role.name())) // Convert Enum to GrantedAuthority
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public String getUsername() {
+    return email; // Spring Security requires a username field
+  }
 }

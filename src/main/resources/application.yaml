@@ -2,6 +2,12 @@ spring:
   config:
     activate:
       on-profile: dev
+  data:
+    mongodb:
+      uri: ${MONGODB_CONNECTION_STRING}
+      database: ONOFF
+    rest:
+      enabled: false
 
 springdoc:
   api-docs:
