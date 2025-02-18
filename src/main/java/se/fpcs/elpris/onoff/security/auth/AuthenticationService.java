@@ -3,6 +3,7 @@ package se.fpcs.elpris.onoff.security.auth;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,7 @@ import se.fpcs.elpris.onoff.user.User;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class AuthenticationService {
 
   private final UserRepository userRepository;
@@ -22,6 +24,8 @@ public class AuthenticationService {
   private final AuthenticationManager authenticationManager;
 
   public AuthenticationResponse register(RegisterRequest registerRequest) {
+
+    log.info("register, email: {}", registerRequest.getEmail());
 
     var user = User.builder()
         .firstname(registerRequest.getFirstname())
@@ -39,6 +43,8 @@ public class AuthenticationService {
 
     var jwtToken = jwtService.generateToken(user);
 
+    log.info("register, jwt token created for: {}", registerRequest.getEmail());
+
     return AuthenticationResponse.builder()
         .token(jwtToken)
         .build();
@@ -54,6 +60,9 @@ public class AuthenticationService {
   }
 
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+    log.info("authenticate, request.getEmail(): {}", request.getEmail());
+
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
             request.getEmail(),
@@ -63,7 +72,11 @@ public class AuthenticationService {
     var user = userRepository.findByEmail(request.getEmail())
         .orElseThrow(); //TODO better error handling?
 
+    log.info("authenticate, user.getEmail(): {}", user.getEmail());
+
     var jwtToken = jwtService.generateToken(user);
+
+    log.info("register, jwt token created for: {}", request.getEmail());
 
     return AuthenticationResponse.builder()
         .token(jwtToken)

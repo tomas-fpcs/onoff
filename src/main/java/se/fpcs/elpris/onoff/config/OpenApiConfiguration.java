@@ -21,11 +21,11 @@ public class OpenApiConfiguration {
 
     final String url;
     final String serviceName = System.getenv("K_SERVICE");
-    log.info("serviceName: {}", serviceName);
+    log.trace("serviceName: {}", serviceName);
     final String projectId = System.getenv("GOOGLE_CLOUD_PROJECT");
-    log.info("projectId: {}", projectId);
+    log.trace("projectId: {}", projectId);
     final String region = System.getenv("DEPLOY_REGION");
-    log.info("region: {}", region);
+    log.trace("region: {}", region);
 
 
 
@@ -34,8 +34,7 @@ public class OpenApiConfiguration {
     } else {
       url = "http://localhost:8080";
     }
-
-    log.info("url: {}", url);
+    log.info("OpenApi base url: {}", url);
 
     return new OpenAPI()
         .addSecurityItem(new SecurityRequirement().addList("bearerAuth")) // Apply globally
