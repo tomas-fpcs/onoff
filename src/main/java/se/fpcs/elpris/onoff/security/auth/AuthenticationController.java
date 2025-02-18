@@ -27,9 +27,12 @@ public class AuthenticationController {
   }
 
   @PostMapping(value = ONOFF_AUTH + "/authenticate")
-  public ResponseEntity<AuthenticationResponse> register(
+  public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody AuthenticationRequest authenticationRequest
   ) {
+
+    log.info("authenticate, email: {}", authenticationRequest.getEmail());
+
     return ResponseEntity.ok(
         authenticationService.authenticate(authenticationRequest));
   }
