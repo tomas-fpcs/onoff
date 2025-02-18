@@ -1,6 +1,5 @@
 package se.fpcs.elpris.onoff.rest;
 
-import static se.fpcs.elpris.onoff.Constants.ADMIN;
 import static se.fpcs.elpris.onoff.Constants.HAS_ROLE_ADMIN;
 import static se.fpcs.elpris.onoff.Constants.ONOFF_V1;
 
@@ -36,7 +35,7 @@ public class UserController {
       content = {@Content(mediaType = "application/json",
           schema = @Schema(implementation = User.class))})
   @PreAuthorize(HAS_ROLE_ADMIN)
-  @PostMapping(value = ONOFF_V1 + ADMIN + "/user")
+  @PostMapping(value = ONOFF_V1 + "/user")
   public ResponseEntity<?> createUser(@RequestBody User user) {
 
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -46,7 +45,7 @@ public class UserController {
   }
 
   @Operation(summary = "Get all Users")
-  @GetMapping(value = ONOFF_V1 + ADMIN + "/user")
+  @GetMapping(value = ONOFF_V1 + "/user")
   @PreAuthorize(HAS_ROLE_ADMIN)
   @SuppressWarnings("java:S1452")
   public ResponseEntity<?> findAll() {

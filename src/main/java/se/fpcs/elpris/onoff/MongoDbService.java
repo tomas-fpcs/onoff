@@ -24,9 +24,9 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 @Log4j2
 public abstract class MongoDbService {
 
-  private static final String MONGODB_CONNECTION_STRING_NAME = "MONGODB_CONNECTION_STRING";
+  private static final String MONGODB_CONNECTION_STRING_KEY = "MONGODB_CONNECTION_STRING";
   private static final String MONGODB_CONNECTION_STRING = System.getenv(
-      MONGODB_CONNECTION_STRING_NAME);
+      MONGODB_CONNECTION_STRING_KEY);
   private final MongoClientSettings mongoClientSettings;
 
   private final ObjectMapper objectMapper;
@@ -42,7 +42,7 @@ public abstract class MongoDbService {
     this.objectMapper = om;
 
     requireNonNull(MONGODB_CONNECTION_STRING,
-        "Environment variable " + MONGODB_CONNECTION_STRING_NAME + " not set");
+        "Environment variable " + MONGODB_CONNECTION_STRING_KEY + " not set");
 
     ServerApi serverApi = ServerApi.builder()
         .version(ServerApiVersion.V1)

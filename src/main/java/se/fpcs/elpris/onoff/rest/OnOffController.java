@@ -16,16 +16,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import se.fpcs.elpris.onoff.OnOff;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.user.User;
 import se.fpcs.elpris.onoff.validation.ValidEnum;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Log4j2
-@SuppressWarnings("java:S6833") // this class is NOT a REST controller
 public class OnOffController {
 
   private final OnOffServiceProvider onOffServiceProvider;

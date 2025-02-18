@@ -7,7 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -17,8 +17,10 @@ import se.fpcs.elpris.onoff.db.DatabaseOperationException;
 @Log4j2
 public class GlobalExceptionHandler {
 
+  //TODO handle org.springframework.security.authentication.LockedException (user account locked)
+
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+  public ResponseEntity<ErrorResponse> handle(
       ConstraintViolationException ex) {
 
     final String errors = ex.getConstraintViolations().stream()
@@ -36,7 +38,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(DatabaseOperationException.class)
-  public ResponseEntity<ErrorResponse> handleDatabaseOperationException(
+  public ResponseEntity<ErrorResponse> handle(
       DatabaseOperationException ex) {
 
     log.error("Database error: {}", ex.getMessage());
@@ -52,7 +54,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+  public ResponseEntity<ErrorResponse> handle(AccessDeniedException e) {
 
     return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
@@ -64,9 +66,22 @@ public class GlobalExceptionHandler {
 
   }
 
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ErrorResponse> handle(HttpRequestMethodNotSupportedException e) {
+
+    return ResponseEntity
+        .status(HttpStatus.METHOD_NOT_ALLOWED)
+        .body(ErrorResponse.builder()
+            .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+            .message(e.getMessage())
+            .status(HttpStatus.METHOD_NOT_ALLOWED.value())
+            .build());
+
+  }
+
   // Catch-all exception handler
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleAllOtherExceptions(Exception ex, WebRequest request) {
+  public ResponseEntity<ErrorResponse> handle(Exception ex, WebRequest request) {
 
     log.error("{}: {}", ex.getClass().getName(), ex.getMessage(), ex);
 

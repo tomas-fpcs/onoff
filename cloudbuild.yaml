@@ -29,8 +29,9 @@ steps:
       - --set-env-vars=GOOGLE_CLIENT_SECRET=$_GOOGLE_CLIENT_SECRET
       - --set-env-vars=MONGODB_CONNECTION_STRING=$_MONGODB_CONNECTION_STRING
       - --set-env-vars=JWT_SECRET_KEY=$_JWT_SECRET_KEY
-      - --set-env-vars=GOOGLE_CLOUD_PROJECT=511383166465
-      - --set-env-vars=K_REGION=europe-north1
+      - --set-env-vars=ONOFF_ADMIN_PASSWORD=$_ONOFF_ADMIN_PASSWORD
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$_GOOGLE_CLOUD_PROJECT
+      - --set-env-vars=K_REGION=$_K_REGION
       - --set-env-vars=LOGGING_LEVEL_SE_FPCS=TRACE
       - --image=gcr.io/$PROJECT_ID/onoff
       - --platform=managed

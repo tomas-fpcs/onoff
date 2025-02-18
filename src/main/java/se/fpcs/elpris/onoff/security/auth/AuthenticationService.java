@@ -29,6 +29,10 @@ public class AuthenticationService {
         .email(registerRequest.getEmail())
         .password(passwordEncoder.encode(registerRequest.getPassword()))
         .roles(toRoleEnumSet(registerRequest.getRoles()))
+        .accountNonExpired(true)
+        .accountNonLocked(true)
+        .credentialsNonExpired(true)
+        .enabled(true)
         .build();
 
     userRepository.save(user);

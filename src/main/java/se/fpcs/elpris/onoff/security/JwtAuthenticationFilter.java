@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -27,12 +29,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Log4j2
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+  public static final RequestMatcher[] PUBLIC_PATHS_MATCHERS =
+      Arrays.stream(PUBLIC_PATHS)
+          .map(AntPathRequestMatcher::new)
+          .toArray(RequestMatcher[]::new);
+
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-    return Arrays.stream(PUBLIC_PATHS)
+    return Arrays.stream(PUBLIC_PATHS_MATCHERS)
         .anyMatch(matcher -> matcher.matches(request));
   }
 

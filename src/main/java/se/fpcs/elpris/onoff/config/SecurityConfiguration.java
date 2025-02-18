@@ -18,9 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import se.fpcs.elpris.onoff.security.CustomAuthenticationEntryPoint;
+import se.fpcs.elpris.onoff.security.HttpRequestMethodNotSupportedExceptionFilter;
 import se.fpcs.elpris.onoff.security.JwtAuthenticationFilter;
 
 
@@ -30,12 +29,13 @@ import se.fpcs.elpris.onoff.security.JwtAuthenticationFilter;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-  public static final RequestMatcher[] PUBLIC_PATHS = {
-      new AntPathRequestMatcher("/swagger-ui/**"),
-      new AntPathRequestMatcher("/v3/api-docs/**"),
-      new AntPathRequestMatcher("/onoff/auth/**")};
+  public static final String[] PUBLIC_PATHS = {
+      "/swagger-ui/**",
+      "/v3/api-docs/**",
+      "/api/v1/auth/authenticate"};
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final HttpRequestMethodNotSupportedExceptionFilter httpRequestMethodNotSupportedExceptionFilter;
   private final UserDetailsConfiguration userDetailsConfiguration;
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
@@ -53,20 +53,21 @@ public class SecurityConfiguration {
       throws Exception {
 
     return http
-        .csrf(csrfCustomizer)
+        .csrf(csrf -> csrf.disable())
         .exceptionHandling(ex -> ex
             .authenticationEntryPoint(customAuthenticationEntryPoint)
         )
-        .authorizeHttpRequests(auth ->
-            auth.requestMatchers(PUBLIC_PATHS)
-                .permitAll()
-                .anyRequest()
-                .authenticated())
+        .authorizeHttpRequests(auth -> {
+          auth.requestMatchers(PUBLIC_PATHS).permitAll();
+          auth.anyRequest().authenticated();
+        })
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(getAuthenticationProvider())
         .addFilterBefore(
-            jwtAuthenticationFilter,
+            httpRequestMethodNotSupportedExceptionFilter,
+            UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(jwtAuthenticationFilter,
             UsernamePasswordAuthenticationFilter.class)
         .build();
 
