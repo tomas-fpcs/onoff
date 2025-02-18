@@ -31,7 +31,7 @@ steps:
       - --set-env-vars=JWT_SECRET_KEY=$_JWT_SECRET_KEY
       - --set-env-vars=ONOFF_ADMIN_PASSWORD=$_ONOFF_ADMIN_PASSWORD
       - --set-env-vars=GOOGLE_CLOUD_PROJECT=$_GOOGLE_CLOUD_PROJECT
-      - --set-env-vars=K_REGION=$_K_REGION
+      - --set-env-vars=DEPLOY_REGION=$_DEPLOY_REGION
       - --set-env-vars=LOGGING_LEVEL_SE_FPCS=TRACE
       - --image=gcr.io/$PROJECT_ID/onoff
       - --platform=managed

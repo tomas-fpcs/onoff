@@ -24,7 +24,7 @@ public class OpenApiConfiguration {
     log.info("serviceName: {}", serviceName);
     final String projectId = System.getenv("GOOGLE_CLOUD_PROJECT");
     log.info("projectId: {}", projectId);
-    final String region = System.getenv("K_REGION");
+    final String region = System.getenv("DEPLOY_REGION");
     log.info("region: {}", region);
 
 
