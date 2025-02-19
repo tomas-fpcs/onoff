@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class OnOff {
+public class OnOffResponse {
 
   @JsonProperty("on")
   private boolean on;

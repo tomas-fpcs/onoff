@@ -12,15 +12,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import se.fpcs.elpris.onoff.OnOff;
+import se.fpcs.elpris.onoff.OnOffResponse;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceZone;
-import se.fpcs.elpris.onoff.user.User;
 import se.fpcs.elpris.onoff.validation.ValidEnum;
 
 @RestController
@@ -33,7 +34,7 @@ public class OnOffController {
   @Operation(summary = "Determine if device should be on")
   @ApiResponse(responseCode = "200",
       content = {@Content(mediaType = "application/json",
-          schema = @Schema(implementation = OnOff.class))})
+          schema = @Schema(implementation = OnOffResponse.class))})
   @GetMapping(value = ONOFF_V1 + "/onoff")
   @ResponseBody
   @SuppressWarnings("java:S1452")
@@ -56,40 +57,44 @@ public class OnOffController {
       @ValidEnum(enumClass = OutputType.class, allowNull = true) OutputType outputType
   ) {
 
-    OnOff onOff = onOffServiceProvider.get(priceSource).on(
-        priceZone,
-        markupPercent,
-        maxPriceOre,
-        User.builder()
-            .email("test@example.com")
-            .build()); //TODO implement real users
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null ||
+        !(authentication.getPrincipal() instanceof UserDetails)) {
+      throw new IllegalStateException("UserDetails not found");
+    }
+
+    OnOffResponse onOffResponse = onOffServiceProvider.get(priceSource)
+        .on(priceZone,
+            markupPercent,
+            maxPriceOre,
+            (UserDetails) authentication.getPrincipal());
 
     if (outputType == null || outputType == OutputType.JSON) {
       return ResponseEntity.ok()
           .contentType(MediaType.APPLICATION_JSON)
-          .body(onOff);
+          .body(onOffResponse);
     } //
     else if (outputType == OutputType.MINIMALIST) {
       return ResponseEntity.ok()
           .contentType(MediaType.TEXT_PLAIN)
-          .body(onOff.isOn());
+          .body(onOffResponse.isOn());
     } //
     else {
       return ResponseEntity.ok()
           .contentType(MediaType.TEXT_PLAIN)
-          .body(toText(onOff));
+          .body(toText(onOffResponse));
     }
 
   }
 
-  public static String toText(OnOff onOff) {
+  public static String toText(OnOffResponse onOffResponse) {
 
     return String.format("on=%s;max-price=%s;price-spot=%s;price-supplier=%s;user-name=%s",
-        onOff.isOn(),
-        onOff.getMaxPrice(),
-        onOff.getPriceSpot(),
-        onOff.getPriceSupplier(),
-        onOff.getUserName());
+        onOffResponse.isOn(),
+        onOffResponse.getMaxPrice(),
+        onOffResponse.getPriceSpot(),
+        onOffResponse.getPriceSupplier(),
+        onOffResponse.getUserName());
 
   }
 

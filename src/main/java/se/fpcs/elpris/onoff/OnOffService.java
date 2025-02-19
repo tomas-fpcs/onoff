@@ -1,14 +1,15 @@
 package se.fpcs.elpris.onoff;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.user.User;
 
 public interface OnOffService {
 
-  OnOff on(
+  OnOffResponse on(
       PriceZone priceZone,
       int markupPercent,
       int maxPriceOre,
-      User user);
+      UserDetails userDetails);
 
 }
