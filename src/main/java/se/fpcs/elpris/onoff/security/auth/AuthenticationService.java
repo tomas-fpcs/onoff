@@ -25,7 +25,9 @@ public class AuthenticationService {
 
   public AuthenticationResponse register(RegisterRequest registerRequest) {
 
-    log.info("register, email: {}", registerRequest.getEmail());
+    if (log.isTraceEnabled()) {
+      log.trace("register, email: {}", registerRequest.getEmail());
+    }
 
     var user = User.builder()
         .firstname(registerRequest.getFirstname())
@@ -43,7 +45,9 @@ public class AuthenticationService {
 
     var jwtToken = jwtService.generateToken(user);
 
-    log.info("register, jwt token created for: {}", registerRequest.getEmail());
+    if (log.isTraceEnabled()) {
+      log.trace("register, jwt token created for: {}", registerRequest.getEmail());
+    }
 
     return AuthenticationResponse.builder()
         .token(jwtToken)
@@ -61,7 +65,9 @@ public class AuthenticationService {
 
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
-    log.info("authenticate, request.getEmail(): {}", request.getEmail());
+    if (log.isTraceEnabled()) {
+      log.trace("authenticate, request.getEmail(): {}", request.getEmail());
+    }
 
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
@@ -72,11 +78,15 @@ public class AuthenticationService {
     var user = userRepository.findByEmail(request.getEmail())
         .orElseThrow(); //TODO better error handling?
 
-    log.info("authenticate, user.getEmail(): {}", user.getEmail());
+    if (log.isTraceEnabled()) {
+      log.trace("authenticate, user.getEmail(): {}", user.getEmail());
+    }
 
     var jwtToken = jwtService.generateToken(user);
 
-    log.info("register, jwt token created for: {}", request.getEmail());
+    if (log.isTraceEnabled()) {
+      log.trace("authenticate, jwt token created for: {}", request.getEmail());
+    }
 
     return AuthenticationResponse.builder()
         .token(jwtToken)

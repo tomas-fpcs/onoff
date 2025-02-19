@@ -22,6 +22,11 @@ public class AuthenticationController {
   public ResponseEntity<AuthenticationResponse> register(
       @RequestBody RegisterRequest registerRequest
   ) {
+
+    if (log.isTraceEnabled()) {
+      log.trace("register, email: {}", registerRequest.getEmail());
+    }
+
     return ResponseEntity.ok(
         authenticationService.register(registerRequest));
   }
@@ -31,7 +36,9 @@ public class AuthenticationController {
       @RequestBody AuthenticationRequest authenticationRequest
   ) {
 
-    log.info("authenticate, email: {}", authenticationRequest.getEmail());
+    if (log.isTraceEnabled()) {
+      log.trace("authenticate, email: {}", authenticationRequest.getEmail());
+    }
 
     return ResponseEntity.ok(
         authenticationService.authenticate(authenticationRequest));
