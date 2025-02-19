@@ -12,7 +12,7 @@ import se.fpcs.elpris.onoff.OnOff;
 import se.fpcs.elpris.onoff.OnOffService;
 import se.fpcs.elpris.onoff.price.PriceForHour;
 import se.fpcs.elpris.onoff.price.PriceNotFoundException;
-import se.fpcs.elpris.onoff.price.PriceService;
+import se.fpcs.elpris.onoff.price.PriceRepository;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
@@ -24,7 +24,7 @@ import se.fpcs.elpris.onoff.user.User;
 @Log4j2
 public class EPJN_OnOffService implements OnOffService {
 
-  private final PriceService priceService;
+  private final PriceRepository priceRepository;
   private final PriceUpdaterStatus priceUpdaterStatus;
 
   @Override
@@ -40,9 +40,9 @@ public class EPJN_OnOffService implements OnOffService {
 
     final Date dateNow = new Date();
     Optional<PriceForHour> optionalPriceForHour =
-        priceService.findPriceByPriceZoneAndPriceDayAndPriceHour(
-            PriceSource.ELPRISETJUSTNU,
-            priceZone,
+        priceRepository.findByPriceSourceAndPriceZoneAndPriceDayAndPriceHour(
+            PriceSource.ELPRISETJUSTNU.name(),
+            priceZone.name(),
             toYYYYMMDD(dateNow),
             toHour(dateNow));
 

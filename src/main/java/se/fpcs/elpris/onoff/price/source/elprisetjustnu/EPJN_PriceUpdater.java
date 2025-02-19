@@ -11,8 +11,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,29 +22,21 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import se.fpcs.elpris.onoff.Constants;
 import se.fpcs.elpris.onoff.db.DatabaseOperationException;
 import se.fpcs.elpris.onoff.price.PriceForHour;
-import se.fpcs.elpris.onoff.price.PriceService;
+import se.fpcs.elpris.onoff.price.PriceRepository;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
 import se.fpcs.elpris.onoff.price.source.elprisetjustnu.model.EPJN_Price;
 
 @Service
+@RequiredArgsConstructor
 @Log4j2
 @Profile("!test")
 public class EPJN_PriceUpdater {
 
-  private EPJN_Client client;
-  private final PriceService priceService;
+  private final EPJN_Client client;
+  private final PriceRepository priceRepository;
   private final PriceUpdaterStatus priceUpdaterStatus;
-
-  public EPJN_PriceUpdater(
-      EPJN_Client client,
-      PriceService priceService,
-      PriceUpdaterStatus priceUpdaterStatus) {
-    this.client = client;
-    this.priceService = priceService;
-    this.priceUpdaterStatus = priceUpdaterStatus;
-  }
 
   @PostConstruct
   @Scheduled(cron = "0 0 * * * *") // every hour
@@ -156,9 +150,13 @@ public class EPJN_PriceUpdater {
   protected void save(PriceForHour priceForHour) {
 
     try {
-      priceService.save(priceForHour);
+      priceRepository.save(priceForHour);
       if (log.isTraceEnabled()) {
         log.trace("Price saved: {}", priceForHour);
+      }
+    } catch (DuplicateKeyException e) {
+      if (log.isTraceEnabled()) {
+        log.trace("Price already exist: {}", priceForHour);
       }
     } catch (Exception e) {
       throw new DatabaseOperationException("Failed to save Price: " + e.getMessage(), e);

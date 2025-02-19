@@ -32,7 +32,7 @@ public class AdminInitializer implements CommandLineRunner {
 
     if (userRepository.count() == 0) { // ✅ Only create an admin if DB is empty
 
-      final String email = "tomas@fpcs.se";
+      final String email = "tomas@fpcs.se"; //TODO make configurable
 
       authenticationService.register(
           RegisterRequest.builder()

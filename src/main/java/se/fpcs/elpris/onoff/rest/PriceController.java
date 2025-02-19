@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import se.fpcs.elpris.onoff.price.PriceService;
+import se.fpcs.elpris.onoff.price.PriceRepository;
 import se.fpcs.elpris.onoff.price.PriceSource;
 
 
@@ -19,7 +19,7 @@ import se.fpcs.elpris.onoff.price.PriceSource;
 @Log4j2
 public class PriceController {
 
-  private final PriceService priceService;
+  private final PriceRepository priceRepository;
 
   @Operation(summary = "Get all prices")
   @GetMapping(value = ONOFF_V1 + "/price")
@@ -28,9 +28,11 @@ public class PriceController {
       @RequestParam(value = "priceSource", required = false) PriceSource priceSource
   ) {
 
+    //TODO add mandatory filter on priceSource
+
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(priceService.findAll(priceSource));
+        .body(priceRepository.findAll());
 
   }
 

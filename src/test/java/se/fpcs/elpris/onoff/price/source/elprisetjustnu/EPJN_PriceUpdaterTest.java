@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import se.fpcs.elpris.onoff.db.DatabaseOperationException;
 import se.fpcs.elpris.onoff.price.PriceForHour;
-import se.fpcs.elpris.onoff.price.PriceService;
+import se.fpcs.elpris.onoff.price.PriceRepository;
 import se.fpcs.elpris.onoff.price.PriceSource;
 import se.fpcs.elpris.onoff.price.PriceUpdaterStatus;
 import se.fpcs.elpris.onoff.price.PriceZone;
@@ -30,7 +30,7 @@ class EPJN_PriceUpdaterTest {
   private EPJN_Client client;
 
   @Mock
-  private PriceService priceService;
+  private PriceRepository priceRepository;
 
   @Mock
   private PriceUpdaterStatus priceUpdaterStatus;
@@ -40,7 +40,7 @@ class EPJN_PriceUpdaterTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
-    priceUpdater = new EPJN_PriceUpdater(client, priceService, priceUpdaterStatus);
+    priceUpdater = new EPJN_PriceUpdater(client, priceRepository, priceUpdaterStatus);
   }
 
   @Test
@@ -104,14 +104,14 @@ class EPJN_PriceUpdaterTest {
 
     PriceForHour mockPrice = PriceForHour.builder().build();
     priceUpdater.save(mockPrice);
-    verify(priceService).save(mockPrice);
+    verify(priceRepository).save(mockPrice);
   }
 
   @Test
   void shouldThrowDatabaseOperationExceptionOnSaveFailure() {
 
     PriceForHour mockPrice = PriceForHour.builder().build();
-    doThrow(new RuntimeException("Database error")).when(priceService).save(mockPrice);
+    doThrow(new RuntimeException("Database error")).when(priceRepository).save(mockPrice);
     assertThrows(DatabaseOperationException.class, () -> priceUpdater.save(mockPrice));
 
   }

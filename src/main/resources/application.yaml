@@ -6,6 +6,7 @@ spring:
     mongodb:
       uri: ${MONGODB_CONNECTION_STRING}
       database: ONOFF
+      auto-index-creation: true
     rest:
       enabled: false
 
