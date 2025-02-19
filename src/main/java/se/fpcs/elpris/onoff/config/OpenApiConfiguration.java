@@ -27,8 +27,6 @@ public class OpenApiConfiguration {
     final String region = System.getenv("DEPLOY_REGION");
     log.trace("region: {}", region);
 
-
-
     if (serviceName != null && projectId != null && region != null) {
       url = "https://" + serviceName + "-" + projectId + "." + region + ".run.app";
     } else {

@@ -1,49 +1,34 @@
 package se.fpcs.elpris.onoff.config;
 
-import java.util.ArrayList;
+import io.swagger.v3.oas.models.OpenAPI;
 import java.util.List;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "cors")
+@RequiredArgsConstructor
+@Data
 public class CorsProperties {
 
-  private List<String> allowedOrigins = new ArrayList<>();
-  private List<String> allowedMethods = new ArrayList<>();
-  private List<String> allowedHeaders = new ArrayList<>();
-  private boolean allowCredentials;
+  private final OpenAPI openAPI;
 
-  // Getters and Setters
+  private final List<String> allowedMethods =
+      List.of("GET",
+          "POST",
+          "PUT",
+          "DELETE",
+          "OPTIONS");
+  private  final List<String> allowedHeaders = List.of("*");
+  private  final  boolean allowCredentials = true;
+
   public List<String> getAllowedOrigins() {
-    return allowedOrigins;
+
+    return openAPI.getServers().stream()
+        .map(server -> server.getUrl())
+        .toList();
+
   }
 
-  public void setAllowedOrigins(List<String> allowedOrigins) {
-    this.allowedOrigins = allowedOrigins;
-  }
-
-  public List<String> getAllowedMethods() {
-    return allowedMethods;
-  }
-
-  public void setAllowedMethods(List<String> allowedMethods) {
-    this.allowedMethods = allowedMethods;
-  }
-
-  public List<String> getAllowedHeaders() {
-    return allowedHeaders;
-  }
-
-  public void setAllowedHeaders(List<String> allowedHeaders) {
-    this.allowedHeaders = allowedHeaders;
-  }
-
-  public boolean isAllowCredentials() {
-    return allowCredentials;
-  }
-
-  public void setAllowCredentials(boolean allowCredentials) {
-    this.allowCredentials = allowCredentials;
-  }
 }

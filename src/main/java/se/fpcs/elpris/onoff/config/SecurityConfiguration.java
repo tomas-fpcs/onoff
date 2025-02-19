@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,7 +22,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import se.fpcs.elpris.onoff.security.CustomAuthenticationEntryPoint;
 import se.fpcs.elpris.onoff.security.HttpRequestMethodNotSupportedExceptionFilter;
 import se.fpcs.elpris.onoff.security.JwtAuthenticationFilter;
-
 
 @Configuration
 @EnableWebSecurity
@@ -53,7 +53,8 @@ public class SecurityConfiguration {
       throws Exception {
 
     return http
-        .csrf(csrf -> csrf.disable())
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configure(http))
         .exceptionHandling(ex -> ex
             .authenticationEntryPoint(customAuthenticationEntryPoint)
         )
