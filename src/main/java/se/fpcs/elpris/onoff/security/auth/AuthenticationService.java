@@ -41,9 +41,14 @@ public class AuthenticationService {
         .enabled(true)
         .build();
 
-    userRepository.save(user);
+    User createdUser = userRepository.save(user);
+    if (log.isTraceEnabled()) {
+      log.trace(
+          "register, jwt token created for: {}",
+          createdUser == null ? "createdUser is NULL" : createdUser.getEmail());
+    }
 
-    var jwtToken = jwtService.generateToken(user);
+    var jwtToken = jwtService.generateToken(createdUser);
 
     if (log.isTraceEnabled()) {
       log.trace("register, jwt token created for: {}", registerRequest.getEmail());
